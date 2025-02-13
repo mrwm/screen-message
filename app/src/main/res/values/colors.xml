@@ -2,4 +2,12 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="darkLayer1">#24101010</color>
+    <color name="darkLayer2">#48101010</color>
+    <color name="darkLayer3">#60101010</color>
+    <color name="darkLayer4">#72101010</color>
+    <color name="lightLayer1">#24FFFFFF</color>
+    <color name="lightLayer2">#48FFFFFF</color>
+    <color name="lightLayer3">#60FFFFFF</color>
+    <color name="lightLayer4">#72FFFFFF</color>
 </resources>

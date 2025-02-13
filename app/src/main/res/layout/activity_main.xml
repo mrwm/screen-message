@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -7,26 +7,35 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:screenReaderFocusable="false"
         android:id="@+id/screen"
+        android:clickable="true"
+        android:breakStrategy="simple"
+        android:hyphenationFrequency="none"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:autoSizeMaxTextSize="500sp"
         android:autoSizeMinTextSize="12sp"
         android:autoSizeStepGranularity="2sp"
         android:autoSizeTextType="uniform"
+        android:gravity="center_vertical|center_horizontal"
         android:justificationMode="inter_word"
-        android:gravity="center"
-        android:text=""/>
+        android:text="" />
+
     <EditText
         android:id="@+id/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:autoSizeTextType="uniform"
         android:autofillHints=""
+        android:background="@drawable/message_background"
+        android:gravity="center"
+        android:layout_centerInParent="true"
         android:hint="@string/enter_message_here"
         android:inputType="textMultiLine"
-        android:gravity="center"
-        android:background="@null"
-        android:backgroundTint="@color/black"
-        android:autoSizeTextType="uniform"
-        />
-</FrameLayout>
+        android:maxWidth="488dp"
+        android:minHeight="48dp" />
+
+</RelativeLayout>

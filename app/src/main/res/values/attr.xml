@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="layer1" format="reference" />
+    <attr name="layer2" format="reference" />
+    <attr name="layer3" format="reference" />
+    <attr name="layer4" format="reference" />
+</resources>
