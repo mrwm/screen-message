@@ -3,9 +3,12 @@ package com.wchung.screen_message
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
 import android.view.View.OnFocusChangeListener
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
@@ -26,13 +29,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-
         val windowInsetsController =
             WindowCompat.getInsetsController(window, window.decorView)
-        // Configure the behavior of the hidden system bars.
+        // Hide the status and navigation bars
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
         // Add a listener to update the behavior of the toggle fullscreen button when
         // the system bars are hidden or revealed.
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
@@ -43,12 +44,19 @@ class MainActivity : AppCompatActivity() {
         message = findViewById(R.id.message)
         screen = findViewById(R.id.screen)
 
-        var textLines = 1
+        // Get the root view and create a transition.
+        var rootView = findViewById<ViewGroup>(R.id.main)
+        var autoTransition = AutoTransition()
+        autoTransition.setDuration(500) // Set to 500ms to make the fade more noticeable.
+
+        // Use maxlines to workaround the issue of words
+        // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
+                var textLines = 1
                 val textLength = message?.text?.length
-                if (textLength != null && textLength > 10) {
-                    textLines = textLength / 10
+                if (textLength != null && textLength > 5) {
+                    textLines = textLength / 5
                 }
                 screen?.text = s.toString()
                 hasText = s.isNotEmpty()
@@ -64,8 +72,10 @@ class MainActivity : AppCompatActivity() {
             if (!hasFocus) {
                 hideKeyboard(view)
                 if (!hasText) {
+                    TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     message?.visibility = View.VISIBLE
                 } else {
+                    TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     message?.visibility = View.GONE
                 }
             }
