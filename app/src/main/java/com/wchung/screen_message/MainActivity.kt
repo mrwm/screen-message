@@ -71,19 +71,23 @@ class MainActivity : AppCompatActivity() {
             Log.d("message", "Focus: $hasFocus")
             if (!hasFocus) {
                 hideKeyboard(view)
-                if (!hasText) {
+                if (!hasText && message?.parent != null) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
-                    message?.visibility = View.VISIBLE
+                    rootView.addView(message)
+                    //message?.visibility = View.VISIBLE
                 } else {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
-                    message?.visibility = View.GONE
+                    rootView.removeView(message)
+                    //message?.visibility = View.GONE
                 }
             }
         }
 
         screen?.setOnClickListener {
-            if (message?.visibility == View.GONE) {
-                message?.visibility = View.VISIBLE
+            if (message?.parent == null) {
+                TransitionManager.beginDelayedTransition(rootView, autoTransition)
+                rootView.addView(message)
+                //message?.visibility = View.VISIBLE
                 message?.requestFocus()
                 val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showSoftInput(message, InputMethodManager.SHOW_IMPLICIT)
