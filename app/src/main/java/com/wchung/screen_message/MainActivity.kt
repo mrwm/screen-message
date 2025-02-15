@@ -54,8 +54,8 @@ class MainActivity : AppCompatActivity() {
             ViewCompat.onApplyWindowInsets(v, insets)
         }
 
-        val dp8 :  Int = convertDpToPixel(8f, this).toInt()
-        val dp32 :  Int = convertDpToPixel(32f, this).toInt()
+        //val dp8 : Int = convertDpToPixel(8f, this).toInt()
+        val dp32 : Int = convertDpToPixel(32f, this).toInt()
 
         // Get the root view and create a transition.
         var rootView = findViewById<ViewGroup>(R.id.main)
@@ -72,12 +72,13 @@ class MainActivity : AppCompatActivity() {
         )
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
         message!!.layoutParams = layoutParams
-        message!!.setPadding(dp8)
+        message!!.setPadding(dp32)
         message!!.gravity = View.TEXT_ALIGNMENT_CENTER
         message!!.textAlignment = View.TEXT_ALIGNMENT_CENTER
         message!!.isSingleLine = false
         message!!.minHeight = dp32
         message!!.hint = getString(R.string.enter_message_here)
+        message!!.maxLines = 10 // don't cover the whole screen. We want to be able to click out
 
         // Find the screen TextView to display the message
         screen = findViewById(R.id.screen)
@@ -103,18 +104,20 @@ class MainActivity : AppCompatActivity() {
         // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                val textLength = message?.text?.length
-                val newlines = message?.text?.split('\n')?.size
-                // 5 is an arbitrary number. Could be smaller for three letter words,
+                val textLength : Int? = message?.text?.length
+                val newlines : Int? = message?.text?.split('\n')?.size
+                // 4 is an arbitrary number. Could be smaller for three letter words,
                 // but users can use newline to work around it
-                textLines = if (textLength != null && textLength > 5) {
-                    textLength / 5
+                val divisor = 4
+                textLines = if (textLength != null && textLength > divisor) {
+                    textLength / divisor
                 } else {
                     1
                 }
                 if (newlines != null) {
                     textLines += newlines - 1
                 }
+
                 screen?.text = s.toString()
                 isEmptyText = s.isEmpty()
                 screen?.maxLines = textLines
@@ -170,10 +173,10 @@ class MainActivity : AppCompatActivity() {
 
     // Save text properties when the screen rotates
     override fun onSaveInstanceState(outState: Bundle) {
-        val msg: String = message?.text.toString()
-        val isVisible = message?.parent != null
+        val msg : String = message?.text.toString()
+        val isVisible : Boolean = message?.parent != null
 
-        val scrnTxt: String = screen?.text.toString()
+        val scrnTxt : String = screen?.text.toString()
 
         outState.putString("message", msg)
         outState.putBoolean("visibleState", isVisible)
