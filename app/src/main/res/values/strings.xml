@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Screen Message</string>
     <string name="enter_message_here">Enter message here</string>
+    <string name="screen_message">Enter message here</string>
 </resources>
