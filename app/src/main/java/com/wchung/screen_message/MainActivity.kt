@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         )
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
         message!!.layoutParams = layoutParams
-        message!!.setPadding(dp32)
+        message!!.setPadding(dp32/2)
         message!!.gravity = View.TEXT_ALIGNMENT_CENTER
         message!!.textAlignment = View.TEXT_ALIGNMENT_CENTER
         message!!.isSingleLine = false
