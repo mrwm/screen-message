@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.wchung.screen_message"
-        minSdk = 31
+        minSdk = 26 //28
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0.${versionCode}"
+        versionName = "0.0.${versionCode}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,7 +31,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "11"
     }
 }
 
