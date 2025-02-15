@@ -7,7 +7,6 @@ import android.text.TextWatcher
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
@@ -23,12 +22,14 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.setPadding
-
+//import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     private var message : EditText? = null
     private var screen : TextView? = null
-    private var hasText : Boolean = false
+    private var isEmptyText : Boolean = true
+    private var isVisible : Boolean = true
+    private var textLines: Int = 1
 
     private fun convertDpToPixel(dp: Float, context: Context): Float {
         return dp * (context.resources.displayMetrics.densityDpi.toFloat() /
@@ -46,9 +47,11 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         // Add a listener to update the behavior of the toggle fullscreen button when
         // the system bars are hidden or revealed.
-        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { v, insets ->
+            //val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            //view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-            ViewCompat.onApplyWindowInsets(view, windowInsets)
+            ViewCompat.onApplyWindowInsets(v, insets)
         }
 
         val dp8 :  Int = convertDpToPixel(8f, this).toInt()
@@ -59,10 +62,7 @@ class MainActivity : AppCompatActivity() {
         var autoTransition = AutoTransition()
         autoTransition.setDuration(500) // Set to 500ms to make the fade more noticeable.
 
-        //message = findViewById(R.id.message)
-        //Log.i("onCreate", "stringType: " + stringType);
-        screen = findViewById(R.id.screen)
-
+        // Create the message EditText for user input
         message = EditText(this)
         message?.id = View.generateViewId()
         message!!.background = AppCompatResources.getDrawable(this, R.drawable.message_background)
@@ -76,33 +76,47 @@ class MainActivity : AppCompatActivity() {
         message!!.gravity = View.TEXT_ALIGNMENT_CENTER
         message!!.textAlignment = View.TEXT_ALIGNMENT_CENTER
         message!!.isSingleLine = false
-        message!!.minHeight = dp32;
+        message!!.minHeight = dp32
         message!!.hint = getString(R.string.enter_message_here)
 
-        rootView.addView(message)
+        // Find the screen TextView to display the message
+        screen = findViewById(R.id.screen)
 
         // Restore the saved state if screen rotates
         if (savedInstanceState != null) {
-            val text = savedInstanceState.getString("message")
-            message?.setText(text)
+            // So uhhh... which method is more efficient in both space + time complexity?
+            //message?.setText(savedInstanceState.getString("message"))
+            message?.text = Editable.Factory.getInstance().newEditable(
+                                savedInstanceState.getString("message"))
+            screen?.text = savedInstanceState.getString("screen")
+            isVisible = savedInstanceState.getBoolean("visibleState")
+            isEmptyText = savedInstanceState.getBoolean("isEmptyText")
+            textLines = savedInstanceState.getInt("textLines")
+        }
+        if (isVisible) {
+            rootView.addView(message)
         }
 
+        screen?.maxLines = textLines
 
         // Use maxlines to workaround the issue of words
         // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                var textLines = 1
                 val textLength = message?.text?.length
                 val newlines = message?.text?.split('\n')?.size
-                if (textLength != null && textLength > 5) {
-                    textLines = textLength / 5
+                // 5 is an arbitrary number. Could be smaller for three letter words,
+                // but users can use newline to work around it
+                textLines = if (textLength != null && textLength > 5) {
+                    textLength / 5
+                } else {
+                    1
                 }
                 if (newlines != null) {
-                    textLines += newlines
+                    textLines += newlines - 1
                 }
                 screen?.text = s.toString()
-                hasText = s.isNotEmpty()
+                isEmptyText = s.isEmpty()
                 screen?.maxLines = textLines
             }
 
@@ -111,43 +125,62 @@ class MainActivity : AppCompatActivity() {
         })
 
         message?.onFocusChangeListener = OnFocusChangeListener { view, hasFocus ->
-            Log.d("message", "Focus: $hasFocus")
+            //Log.d("message", "Focus: $hasFocus")
             if (!hasFocus) {
-                hideKeyboard(view)
-                if (!hasText && message?.parent == null) {
+                toggleKeyboard(view, false)
+                if (isEmptyText && !isVisible) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.addView(message)
-                    //message?.visibility = View.VISIBLE
                 }
-                if (hasText) {
+                if (!isEmptyText && isVisible) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.removeView(message)
-                    //message?.visibility = View.GONE
                 }
+                isVisible = message?.parent != null
             }
         }
 
         screen?.setOnClickListener {
-            if (message?.parent == null) {
-                TransitionManager.beginDelayedTransition(rootView, autoTransition)
+            TransitionManager.beginDelayedTransition(rootView, autoTransition)
+            if (!isVisible) {
                 rootView.addView(message)
-                //message?.visibility = View.VISIBLE
                 message?.requestFocus()
-                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(message, InputMethodManager.SHOW_IMPLICIT)
+                toggleKeyboard(message!!, true)
             }
+            if (!isEmptyText && isVisible) {
+                rootView.removeView(message)
+            }
+            if (isEmptyText) {
+                message?.requestFocus()
+                toggleKeyboard(message!!, true)
+            }
+            isVisible = message?.parent != null
         }
     }
 
-    private fun hideKeyboard(view: View) {
+    private fun toggleKeyboard(view: View, show: Boolean = false) {
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken,
+                                    InputMethodManager.HIDE_NOT_ALWAYS)
+        if (show) {
+            inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+        }
     }
 
 
+    // Save text properties when the screen rotates
     override fun onSaveInstanceState(outState: Bundle) {
-        val text: String = message?.text.toString()
-        outState.putString("message", text)
+        val msg: String = message?.text.toString()
+        val isVisible = message?.parent != null
+
+        val scrnTxt: String = screen?.text.toString()
+
+        outState.putString("message", msg)
+        outState.putBoolean("visibleState", isVisible)
+        outState.putBoolean("isEmptyText", isEmptyText)
+
+        outState.putString("screen", scrnTxt)
+        outState.putInt("textLines", textLines)
         super.onSaveInstanceState(outState)
     }
 }
