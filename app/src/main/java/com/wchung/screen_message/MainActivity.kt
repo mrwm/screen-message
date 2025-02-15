@@ -23,7 +23,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.setPadding
-import androidx.fragment.app.strictmode.FragmentStrictMode
 
 
 class MainActivity : AppCompatActivity() {
@@ -82,6 +81,12 @@ class MainActivity : AppCompatActivity() {
 
         rootView.addView(message)
 
+        // Restore the saved state if screen rotates
+        if (savedInstanceState != null) {
+            val text = savedInstanceState.getString("message")
+            message?.setText(text)
+        }
+
 
         // Use maxlines to workaround the issue of words
         // being cut off in the middle with autotextsizing.
@@ -89,8 +94,12 @@ class MainActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable) {
                 var textLines = 1
                 val textLength = message?.text?.length
+                val newlines = message?.text?.split('\n')?.size
                 if (textLength != null && textLength > 5) {
                     textLines = textLength / 5
+                }
+                if (newlines != null) {
+                    textLines += newlines
                 }
                 screen?.text = s.toString()
                 hasText = s.isNotEmpty()
@@ -135,4 +144,10 @@ class MainActivity : AppCompatActivity() {
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val text: String = message?.text.toString()
+        outState.putString("message", text)
+        super.onSaveInstanceState(outState)
+    }
 }
