@@ -1,29 +1,40 @@
 package com.wchung.screen_message
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.transition.AutoTransition
 import android.transition.TransitionManager
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.setPadding
+import androidx.fragment.app.strictmode.FragmentStrictMode
 
 
 class MainActivity : AppCompatActivity() {
     private var message : EditText? = null
     private var screen : TextView? = null
     private var hasText : Boolean = false
+
+    private fun convertDpToPixel(dp: Float, context: Context): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() /
+                DisplayMetrics.DENSITY_DEFAULT)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,13 +52,36 @@ class MainActivity : AppCompatActivity() {
             ViewCompat.onApplyWindowInsets(view, windowInsets)
         }
 
-        message = findViewById(R.id.message)
-        screen = findViewById(R.id.screen)
+        val dp8 :  Int = convertDpToPixel(8f, this).toInt()
+        val dp32 :  Int = convertDpToPixel(32f, this).toInt()
 
         // Get the root view and create a transition.
         var rootView = findViewById<ViewGroup>(R.id.main)
         var autoTransition = AutoTransition()
         autoTransition.setDuration(500) // Set to 500ms to make the fade more noticeable.
+
+        //message = findViewById(R.id.message)
+        //Log.i("onCreate", "stringType: " + stringType);
+        screen = findViewById(R.id.screen)
+
+        message = EditText(this)
+        message?.id = View.generateViewId()
+        message!!.background = AppCompatResources.getDrawable(this, R.drawable.message_background)
+        val layoutParams = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.MATCH_PARENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+        message!!.layoutParams = layoutParams
+        message!!.setPadding(dp8)
+        message!!.gravity = View.TEXT_ALIGNMENT_CENTER
+        message!!.textAlignment = View.TEXT_ALIGNMENT_CENTER
+        message!!.isSingleLine = false
+        message!!.minHeight = dp32;
+        message!!.hint = getString(R.string.enter_message_here)
+
+        rootView.addView(message)
+
 
         // Use maxlines to workaround the issue of words
         // being cut off in the middle with autotextsizing.
@@ -71,11 +105,12 @@ class MainActivity : AppCompatActivity() {
             Log.d("message", "Focus: $hasFocus")
             if (!hasFocus) {
                 hideKeyboard(view)
-                if (!hasText && message?.parent != null) {
+                if (!hasText && message?.parent == null) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.addView(message)
                     //message?.visibility = View.VISIBLE
-                } else {
+                }
+                if (hasText) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.removeView(message)
                     //message?.visibility = View.GONE
