@@ -22,7 +22,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.setPadding
-//import android.util.Log
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     private var message : EditText? = null
