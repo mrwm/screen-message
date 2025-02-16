@@ -15,7 +15,7 @@
         android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:autoSizeMaxTextSize="500sp"
+        android:autoSizeMaxTextSize="5000sp"
         android:autoSizeMinTextSize="12sp"
         android:autoSizeStepGranularity="2sp"
         android:autoSizeTextType="uniform"
