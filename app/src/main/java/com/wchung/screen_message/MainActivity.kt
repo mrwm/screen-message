@@ -22,7 +22,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.setPadding
-import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     private var message : EditText? = null
@@ -104,6 +103,7 @@ class MainActivity : AppCompatActivity() {
         // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
+                /* Old implementation. It kinda works, but kinda splits text in unpredictable ways
                 val textLength : Int? = message?.text?.length
                 val newlines : Int? = message?.text?.split('\n')?.size
                 // 4 is an arbitrary number. Could be smaller for three letter words,
@@ -117,6 +117,8 @@ class MainActivity : AppCompatActivity() {
                 if (newlines != null) {
                     textLines += newlines - 1
                 }
+                */
+                textLines = message?.text?.split(' ', '\n')?.size ?: 1
 
                 screen?.text = s.toString()
                 isEmptyText = s.isEmpty()
