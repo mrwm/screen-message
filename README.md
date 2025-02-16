@@ -22,6 +22,7 @@ A simple app to display some text as large as possible.
     alt="Get screen message on Google Play"
     height="75">
 </a>
+
 ---
 
 ### Features:
@@ -54,9 +55,11 @@ A simple app to display some text as large as possible.
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" style="width:500px;"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" style="width:500px;">
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" style="width:1000px;">
 
+<!--
 TODO:
 
 - [ ] Figure out where to add option for changing background color and text color
 - [ ] Maybe: Add ability to share text to this app
 - [ ] No idea if possible: Keep the app open, but have another device send text to it?
   - seems kinda complicated, and would make this not a simple app anymore... :P
+-->
