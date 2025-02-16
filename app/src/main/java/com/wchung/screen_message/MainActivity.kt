@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                /* Old implementation. It kinda works, but kinda splits text in unpredictable ways
+                // Old implementation. It kinda works, but kinda splits text in unpredictable ways
                 val textLength : Int? = message?.text?.length
                 val newlines : Int? = message?.text?.split('\n')?.size
                 // 4 is an arbitrary number. Could be smaller for three letter words,
@@ -117,8 +117,9 @@ class MainActivity : AppCompatActivity() {
                 if (newlines != null) {
                     textLines += newlines - 1
                 }
-                */
-                textLines = message?.text?.split(' ', '\n')?.size ?: 1
+                // Attempted to implement this, but this also causes problems if the user
+                // enters text with sequential whitespaces.
+                //textLines = message?.text?.split(' ', '\n')?.size ?: 1
 
                 screen?.text = s.toString()
                 isEmptyText = s.isEmpty()
