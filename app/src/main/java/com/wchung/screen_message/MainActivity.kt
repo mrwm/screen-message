@@ -1,12 +1,15 @@
 package com.wchung.screen_message
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
@@ -14,14 +17,19 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.setPadding
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
     private var message : EditText? = null
@@ -61,6 +69,9 @@ class MainActivity : AppCompatActivity() {
         var autoTransition = AutoTransition()
         autoTransition.setDuration(500) // Set to 500ms to make the fade more noticeable.
 
+        // Grab the text from intents
+        var messageText : String? = getStringFromIntent(intent)
+
         // Create the message EditText for user input
         message = EditText(this)
         message?.id = View.generateViewId()
@@ -78,9 +89,11 @@ class MainActivity : AppCompatActivity() {
         message!!.minHeight = dp32
         message!!.hint = getString(R.string.enter_message_here)
         message!!.maxLines = 10 // don't cover the whole screen. We want to be able to click out
+        message!!.setText(messageText)
 
         // Find the screen TextView to display the message
         screen = findViewById(R.id.screen)
+        screen?.text = messageText
 
         // Restore the saved state if screen rotates
         if (savedInstanceState != null) {
@@ -189,4 +202,61 @@ class MainActivity : AppCompatActivity() {
         outState.putInt("textLines", textLines)
         super.onSaveInstanceState(outState)
     }
+
+
+    private fun getStringFromIntent(intent: Intent): String? {
+        val intentAction = intent.action
+        var intentType = intent.type
+        Log.i("getStringFromIntent", "intentAction: $intentAction")
+        Log.i("getStringFromIntent", "intentType: $intentType")
+
+        var intentText = intent.getStringExtra(Intent.EXTRA_TEXT)
+        Log.i("getStringFromIntent", "intentText: $intentText")
+        // Return immediately if there's text from the intent, not from the included content
+        if (intentText != null) {
+            return intentText
+        }
+
+        // Handle content that came with the intent
+        val extras = intent.extras ?: return null
+
+        // Exit if there's no content
+        if (Intent.ACTION_SEND == intentAction) {
+            val singleFile = extras.getString(Intent.EXTRA_STREAM)
+            val contentResolver = contentResolver
+            try {
+                checkNotNull(singleFile)
+                val inputStream = checkNotNull(contentResolver.openInputStream(singleFile.toUri()))
+                // Returns the file size in bytes
+                //Log.i("getStringFromIntent", "File Size: " + inputStream.available());
+                val r = BufferedReader(InputStreamReader(inputStream))
+                val total = StringBuilder()
+                var line: String?
+                while ((r.readLine().also { line = it }) != null) {
+                    total.append(line).append('\n')
+                }
+                inputStream.close()
+                intentText = total.toString()
+                //Log.i("getStringFromIntent", "intentText: " + intentText);
+                return intentText
+            } catch (e: IOException) {
+                // Handle exceptions
+                Log.e("StreamProcessing", "Error accessing stream data", e)
+            }
+            Toast.makeText(this, "Unable to parse the data", Toast.LENGTH_LONG).show()
+            Log.wtf("getStringFromIntent", "Intent.ACTION_SEND: how did you get here?")
+            return null
+        }
+        else if (Intent.ACTION_SEND_MULTIPLE == intentAction) {
+            val uris: ArrayList<Uri?> = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)!!
+            Log.i("getStringFromIntent", "uris: $uris")
+            Toast.makeText(
+                this,
+                getString(R.string.multi_share_not_supported), Toast.LENGTH_LONG
+            ).show()
+        }
+        Log.e("getStringFromIntent", "You somehow reached the end...")
+        return null
+    }
+
 }

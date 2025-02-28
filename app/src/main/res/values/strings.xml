@@ -3,4 +3,6 @@
     <string name="enter_message_here">Enter message here</string>
     <string name="screen_message">Enter message here</string>
     <string name="app_intent_filter_description">Display a message</string>
+
+    <string name="multi_share_not_supported">Sharing multiple items is not supported yet</string>
 </resources>
