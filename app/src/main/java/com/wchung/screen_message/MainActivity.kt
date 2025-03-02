@@ -15,6 +15,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -69,13 +70,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         dp24 = convertDpToPixel(24f, this).toInt()
-        Log.d("dp24", dp24.toString()) //just to make the lint happy that convertDpToPixel is used
         dp16 = convertDpToPixel(16f, this).toInt()
 
         // Get the root view and create a transition.
         val rootView = findViewById<ViewGroup>(R.id.main)
         val autoTransition = AutoTransition()
-        autoTransition.setDuration(500) // Set to 500ms to make the fade more noticeable.
+        //autoTransition.setDuration(300) // Without the keyboard, animation gets annoying fast...
 
         // Grab the text from intents
         val messageText : String? = getStringFromIntent(intent)
@@ -105,6 +105,10 @@ class MainActivity : AppCompatActivity() {
             setText(messageText)
         }
 
+        // Find the settings container
+        val settings = findViewById<LinearLayout>(R.id.settings_container)
+        rootView.removeView(settings)
+
         // Restore the saved state if screen rotates
         if (savedInstanceState != null) {
             // So uhhh... which method is more efficient in both space + time complexity?
@@ -118,6 +122,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (isVisible) {
             rootView.addView(message)
+            rootView.addView(settings)
         }
 
         screen?.maxLines = textLines
@@ -126,29 +131,6 @@ class MainActivity : AppCompatActivity() {
         // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                /*
-                // Old implementation. It kinda works, but kinda splits text in unpredictable ways
-                val textLength : Int? = message?.text?.length
-                val newlines : Int? = message?.text?.split('\n')?.size
-                // 4 is an arbitrary number. Could be smaller for three letter words,
-                // but users can use newline to work around it
-                val divisor = 4
-                textLines = if (textLength != null && textLength > divisor) {
-                    textLength / divisor
-                } else {
-                    1
-                }
-                if (newlines != null) {
-                    textLines += newlines - 1
-                }
-                // Attempted to implement this, but this also causes problems if the user
-                // enters text with sequential whitespaces.
-                //textLines = message?.text?.split(' ', '\n')?.size ?: 1
-
-                screen?.text = s.toString()
-                isEmptyText = s.isEmpty()
-                screen?.maxLines = textLines
-                 */
                 setText(s.toString())
             }
 
@@ -159,27 +141,32 @@ class MainActivity : AppCompatActivity() {
         message?.onFocusChangeListener = OnFocusChangeListener { view, hasFocus ->
             //Log.d("message", "Focus: $hasFocus")
             if (!hasFocus) {
-                //toggleKeyboard(view, false)
+                toggleKeyboard(view, false)
                 if (isEmptyText && !isVisible) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.addView(message)
+                    rootView.addView(settings)
                 }
                 if (!isEmptyText && isVisible) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.removeView(message)
+                    rootView.removeView(settings)
                 }
                 isVisible = message?.parent != null
             }
         }
 
         screen?.setOnClickListener {
-            TransitionManager.beginDelayedTransition(rootView, autoTransition)
             if (!isVisible) {
+                TransitionManager.beginDelayedTransition(rootView, autoTransition)
                 rootView.addView(message)
+                rootView.addView(settings)
                 message?.requestFocus()
                 //toggleKeyboard(message!!, true)
             }
             if (!isEmptyText && isVisible) {
+                TransitionManager.beginDelayedTransition(rootView, autoTransition)
+                rootView.removeView(settings)
                 rootView.removeView(message)
             }
             if (isEmptyText) {
@@ -192,28 +179,26 @@ class MainActivity : AppCompatActivity() {
         // Implement a bottom sheet for listing all the settings.
         // The bottom sheet should be able to be dragged up and down, and past the bottom of
         // the screen in order to be hidden... or to only show the drag handle.
-        val settings = findViewById<LinearLayout>(R.id.settings_container)
-        val parent = settings.parent as View
         var bottomDY = 0f
         var maxYPosition by Delegates.notNull<Float>()
         var minYPosition by Delegates.notNull<Float>()
 
-        settings.post(Runnable {
-            maxYPosition = parent.height.toFloat() - settings.height.toFloat()
-            minYPosition = parent.height.toFloat() - dp24
+        settings.post {
+            maxYPosition = rootView.height.toFloat() - settings.height.toFloat()
+            minYPosition = rootView.height.toFloat() - dp24
             settings.y = maxYPosition
 
             settings.animate()
                 .y(minYPosition)
-                .setDuration(1000)
+                //.setDuration(1000)
                 .start()
-        })
+        }
 
         settings.setOnTouchListener(View.OnTouchListener { view, event ->
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     //bottomDX = view!!.x - event.rawX
-                    bottomDY = view!!.y - event.rawY;
+                    bottomDY = view!!.y - event.rawY
                 }
                 MotionEvent.ACTION_MOVE -> {
                     //var displacement = event.rawX + bottomDX
@@ -240,34 +225,35 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-//    private fun toggleKeyboard(view: View, show: Boolean = false) {
-//        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-//        inputMethodManager.hideSoftInputFromWindow(view.windowToken,
-//                                    InputMethodManager.HIDE_NOT_ALWAYS)
-//        if (show) {
-//            inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
-//        }
-//    }
+    /* This is probably not a good idea... seems kinda overcomplicating
+    private fun transformView(duration: Long = 0L, view: View, minYPosition: Float = 0f, alpha : Float = 1f, removeSelf: Boolean = true) {
+        var yPos = minYPosition
+        if (yPos == 0f) {
+            yPos = view.y
+        }
+        view.animate()
+            .y(yPos)
+            .alpha(alpha)
+            .setDuration(duration)
+            .start()
 
-//    override fun onStart() {
-//        val settings = findViewById<FrameLayout>(R.id.settings_container)
-//        val parent = settings.parent as View
-//        var maxYPosition: Float
-//        var minYPosition: Float
-//
-//        settings.post(Runnable {
-//            maxYPosition = parent.height.toFloat() - settings.height.toFloat()
-//            minYPosition = parent.height.toFloat() - dp32
-//            settings.y = maxYPosition
-//
-//            settings.animate()
-//                .y(minYPosition)
-//                .setDuration(1000)
-//                .start()
-//        })
-//        super.onStart()
-//    }
+        if (removeSelf) view.removeSelf()
+    }
+    private fun View?.removeSelf() {
+        this ?: return
+        val parentView = parent as? ViewGroup ?: return
+        parentView.removeView(this)
+    }
+    */
 
+        private fun toggleKeyboard(view: View, @Suppress("SameParameterValue") show: Boolean = false) {
+            val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken,
+                InputMethodManager.HIDE_NOT_ALWAYS)
+            if (show) {
+                inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
 
     private fun setText(text: String) {
         // Old implementation. It kinda works, but kinda splits text in unpredictable ways
@@ -288,7 +274,7 @@ class MainActivity : AppCompatActivity() {
         // enters text with sequential whitespaces.
         //textLines = message?.text?.split(' ', '\n')?.size ?: 1
 
-        screen?.text = text.toString()
+        screen?.text = text
         isEmptyText = text.isEmpty()
         screen?.maxLines = textLines
     }
@@ -310,6 +296,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    // suppress lint warning about deprecated intent.getParcelableArrayListExtra
     @Suppress("DEPRECATION")
     private fun getStringFromIntent(intent: Intent): String? {
         val intentAction = intent.action
