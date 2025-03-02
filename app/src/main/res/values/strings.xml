@@ -5,4 +5,5 @@
     <string name="app_intent_filter_description">Display a message</string>
 
     <string name="multi_share_not_supported">Sharing multiple items is not supported yet</string>
+    <string name="settings_title">Settings</string>
 </resources>
