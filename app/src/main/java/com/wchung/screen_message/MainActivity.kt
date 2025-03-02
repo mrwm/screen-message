@@ -98,7 +98,9 @@ class MainActivity : AppCompatActivity() {
 
         // Find the screen TextView to display the message
         screen = findViewById(R.id.screen)
-        screen?.text = messageText
+        if (messageText != null) {
+            setText(messageText)
+        }
 
         // Restore the saved state if screen rotates
         if (savedInstanceState != null) {
@@ -121,6 +123,7 @@ class MainActivity : AppCompatActivity() {
         // being cut off in the middle with autotextsizing.
         message?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
+                /*
                 // Old implementation. It kinda works, but kinda splits text in unpredictable ways
                 val textLength : Int? = message?.text?.length
                 val newlines : Int? = message?.text?.split('\n')?.size
@@ -142,6 +145,8 @@ class MainActivity : AppCompatActivity() {
                 screen?.text = s.toString()
                 isEmptyText = s.isEmpty()
                 screen?.maxLines = textLines
+                 */
+                setText(s.toString())
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -230,6 +235,29 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
+    private fun setText(text: String) {
+        // Old implementation. It kinda works, but kinda splits text in unpredictable ways
+        val textLength : Int? = message?.text?.length
+        val newlines : Int? = message?.text?.split('\n')?.size
+        // 4 is an arbitrary number. Could be smaller for three letter words,
+        // but users can use newline to work around it
+        val divisor = 4
+        textLines = if (textLength != null && textLength > divisor) {
+            textLength / divisor
+        } else {
+            1
+        }
+        if (newlines != null) {
+            textLines += newlines - 1
+        }
+        // Attempted to implement this, but this also causes problems if the user
+        // enters text with sequential whitespaces.
+        //textLines = message?.text?.split(' ', '\n')?.size ?: 1
+
+        screen?.text = text.toString()
+        isEmptyText = text.isEmpty()
+        screen?.maxLines = textLines
+    }
 
     // Save text properties when the screen rotates
     override fun onSaveInstanceState(outState: Bundle) {
