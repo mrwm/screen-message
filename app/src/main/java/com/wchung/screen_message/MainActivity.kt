@@ -16,7 +16,7 @@ import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -32,6 +32,7 @@ import androidx.core.view.setPadding
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
     private var message : EditText? = null
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     private var isEmptyText : Boolean = true
     private var isVisible : Boolean = true
     private var textLines: Int = 1
+    private var dp16 by Delegates.notNull<Int>()
+    private var dp24 by Delegates.notNull<Int>()
 
     private fun convertDpToPixel(dp: Float, context: Context): Float {
         return dp * (context.resources.displayMetrics.densityDpi.toFloat() /
@@ -65,9 +68,9 @@ class MainActivity : AppCompatActivity() {
             ViewCompat.onApplyWindowInsets(v, insets)
         }
 
-        val dp32 : Int = convertDpToPixel(32f, this).toInt()
-        Log.d("dp32", dp32.toString()) //just to make the lint happy that convertDpToPixel is used
-        val dp16 : Int = convertDpToPixel(16f, this).toInt()
+        dp24 = convertDpToPixel(24f, this).toInt()
+        Log.d("dp24", dp24.toString()) //just to make the lint happy that convertDpToPixel is used
+        dp16 = convertDpToPixel(16f, this).toInt()
 
         // Get the root view and create a transition.
         val rootView = findViewById<ViewGroup>(R.id.main)
@@ -189,13 +192,24 @@ class MainActivity : AppCompatActivity() {
         // Implement a bottom sheet for listing all the settings.
         // The bottom sheet should be able to be dragged up and down, and past the bottom of
         // the screen in order to be hidden... or to only show the drag handle.
-        val settings = findViewById<FrameLayout>(R.id.settings_container)
+        val settings = findViewById<LinearLayout>(R.id.settings_container)
         val parent = settings.parent as View
         var bottomDY = 0f
+        var maxYPosition by Delegates.notNull<Float>()
+        var minYPosition by Delegates.notNull<Float>()
+
+        settings.post(Runnable {
+            maxYPosition = parent.height.toFloat() - settings.height.toFloat()
+            minYPosition = parent.height.toFloat() - dp24
+            settings.y = maxYPosition
+
+            settings.animate()
+                .y(minYPosition)
+                .setDuration(1000)
+                .start()
+        })
 
         settings.setOnTouchListener(View.OnTouchListener { view, event ->
-            val maxYPosition = parent.height.toFloat() - settings.height.toFloat()
-            val minYPosition = parent.height.toFloat() - dp32
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     //bottomDX = view!!.x - event.rawX
@@ -234,6 +248,26 @@ class MainActivity : AppCompatActivity() {
 //            inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
 //        }
 //    }
+
+//    override fun onStart() {
+//        val settings = findViewById<FrameLayout>(R.id.settings_container)
+//        val parent = settings.parent as View
+//        var maxYPosition: Float
+//        var minYPosition: Float
+//
+//        settings.post(Runnable {
+//            maxYPosition = parent.height.toFloat() - settings.height.toFloat()
+//            minYPosition = parent.height.toFloat() - dp32
+//            settings.y = maxYPosition
+//
+//            settings.animate()
+//                .y(minYPosition)
+//                .setDuration(1000)
+//                .start()
+//        })
+//        super.onStart()
+//    }
+
 
     private fun setText(text: String) {
         // Old implementation. It kinda works, but kinda splits text in unpredictable ways
