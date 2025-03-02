@@ -1,5 +1,6 @@
 package com.wchung.screen_message
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,11 +11,12 @@ import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -43,6 +45,8 @@ class MainActivity : AppCompatActivity() {
                 DisplayMetrics.DENSITY_DEFAULT)
     }
 
+    //used to suppress lint warning about setOnTouchListener
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -61,8 +65,8 @@ class MainActivity : AppCompatActivity() {
             ViewCompat.onApplyWindowInsets(v, insets)
         }
 
-        val dp8 : Int = convertDpToPixel(8f, this).toInt()
-        Log.d("dp8", dp8.toString()) //just to make the lint happy that convertDpToPixel is used
+        val dp32 : Int = convertDpToPixel(32f, this).toInt()
+        Log.d("dp32", dp32.toString()) //just to make the lint happy that convertDpToPixel is used
         val dp16 : Int = convertDpToPixel(16f, this).toInt()
 
         // Get the root view and create a transition.
@@ -180,6 +184,41 @@ class MainActivity : AppCompatActivity() {
         // Implement a bottom sheet for listing all the settings.
         // The bottom sheet should be able to be dragged up and down, and past the bottom of
         // the screen in order to be hidden... or to only show the drag handle.
+        val settings = findViewById<FrameLayout>(R.id.settings_container)
+        val parent = settings.parent as View
+        var bottomDY = 0f
+
+        settings.setOnTouchListener(View.OnTouchListener { view, event ->
+            val maxYPosition = parent.height.toFloat() - settings.height.toFloat()
+            val minYPosition = parent.height.toFloat() - dp32
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    //bottomDX = view!!.x - event.rawX
+                    bottomDY = view!!.y - event.rawY;
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    //var displacement = event.rawX + bottomDX
+                    var displacement = event.rawY + bottomDY
+                    if (displacement < maxYPosition) {
+                        displacement = maxYPosition
+                    }
+                    if (displacement > minYPosition) {
+                        displacement = minYPosition
+                    }
+                    view!!.animate()
+                        //.x(displacement)
+                        .y(displacement)
+                        .setDuration(0)
+                        .start()
+                    view.performClick()
+                }
+                else -> {
+                    return@OnTouchListener false
+                }
+            }
+            return@OnTouchListener true
+            }
+        )
     }
 
 //    private fun toggleKeyboard(view: View, show: Boolean = false) {
@@ -262,5 +301,6 @@ class MainActivity : AppCompatActivity() {
         Log.e("getStringFromIntent", "You somehow reached the end...")
         return null
     }
+
 
 }

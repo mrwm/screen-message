@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Bottom sheet background -->
+    <item>
+            <shape android:shape="rectangle">
+                <size
+                    android:width="128dp"
+                    android:height="64dp" />
+                <corners
+                    android:topLeftRadius="32dp"
+                    android:topRightRadius="32dp" />
+<!--                <gradient android:type="linear"-->
+<!--                    android:angle="270"-->
+<!--                    android:endColor="@color/white"-->
+<!--                    android:startColor="@color/black" />-->
+                <solid android:color="?attr/settings_background" />
+            </shape>
+    </item>
+
+    <!-- Drag handle for bottom sheet -->
+    <item
+        android:width="32dp"
+        android:height="6dp"
+        android:gravity="top|center"
+        android:top="12dp"
+        >
+        <shape
+            android:shape="rectangle"
+            >
+            <!-- for some reason, <size> doesn't appear to work here... -->
+            <!--<size-->
+            <!--    android:width="1dp"-->
+            <!--    android:height="1dp" />-->
+            <corners
+                android:radius="32dp"/>
+            <solid android:color="?attr/layer4" />
+        </shape>
+    </item>
+</layer-list>

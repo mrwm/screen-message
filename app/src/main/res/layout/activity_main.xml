@@ -28,17 +28,18 @@
         the actual settings for the app.
         Also, this is only for portrait view. Landscape view will use a side sheet.
      -->
-<!--    <FrameLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:padding="32dp"-->
-<!--        android:background="@drawable/settings_background">-->
-<!--        <Button-->
-<!--            android:id="@+id/button"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:text="Button" />-->
-<!--    </FrameLayout>-->
+    <FrameLayout
+        android:id="@+id/settings_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:padding="32dp"
+        android:background="@drawable/settings_background">
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button" />
+    </FrameLayout>
 </RelativeLayout>
