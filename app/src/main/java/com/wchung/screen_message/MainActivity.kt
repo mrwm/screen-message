@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.transition.AutoTransition
 import android.transition.TransitionManager
@@ -16,6 +17,7 @@ import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -35,7 +37,12 @@ import java.io.IOException
 import java.io.InputStreamReader
 import kotlin.properties.Delegates
 
+
 class MainActivity : AppCompatActivity() {
+    /* Settings */
+    private var scrollText : Boolean = false
+
+    /* Main part of the app */
     private var message : EditText? = null
     private var screen : TextView? = null
     private var isEmptyText : Boolean = true
@@ -223,6 +230,14 @@ class MainActivity : AppCompatActivity() {
             return@OnTouchListener true
             }
         )
+
+        // Settings for scrolling the text
+        val scrollCheck = findViewById<CheckBox>(R.id.scrollCheckbox)
+        scrollText = scrollCheck.isChecked
+        scrollCheck.setOnClickListener {
+            scrollText = scrollCheck.isChecked
+            setText(message?.text.toString())
+        }
     }
 
     /* This is probably not a good idea... seems kinda overcomplicating
@@ -270,6 +285,26 @@ class MainActivity : AppCompatActivity() {
         if (newlines != null) {
             textLines += newlines - 1
         }
+        if (scrollText) {
+            /* So this works... but at a horrifically slow pace. It is also not possible to change
+            the marquee speed either, as the app compat library does not support it.
+
+            Other methods like using animation to animate and scroll text does not work:
+            The text will be cropped.
+
+            Using a scrollview also has weird issues.
+            */
+            screen?.isSingleLine = true
+            screen?.ellipsize = TextUtils.TruncateAt.MARQUEE
+            screen?.marqueeRepeatLimit = -1
+            screen?.isSelected = true
+        }
+        else {
+            screen?.isSingleLine = false
+            screen?.ellipsize = null
+            screen?.marqueeRepeatLimit = 0
+            screen?.isSelected = false
+        }
         // Attempted to implement this, but this also causes problems if the user
         // enters text with sequential whitespaces.
         //textLines = message?.text?.split(' ', '\n')?.size ?: 1
@@ -277,6 +312,8 @@ class MainActivity : AppCompatActivity() {
         screen?.text = text
         isEmptyText = text.isEmpty()
         screen?.maxLines = textLines
+
+
     }
 
     // Save text properties when the screen rotates

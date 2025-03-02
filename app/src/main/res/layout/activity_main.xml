@@ -4,11 +4,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/screen"
-        android:layout_width="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:autoSizeMaxTextSize="5000sp"
         android:autoSizeMinTextSize="12sp"
@@ -52,15 +56,12 @@
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
-        <Button
-            android:id="@+id/button"
+        <CheckBox
+            android:id="@+id/scrollCheckbox"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Button" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
+            android:layout_height="wrap_content"
+            android:text="@string/scroll_text" />
+
 
 
     </LinearLayout>
