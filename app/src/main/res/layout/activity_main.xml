@@ -7,20 +7,38 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:focusable="true"
         android:id="@+id/screen"
-        android:clickable="true"
-        android:breakStrategy="simple"
-        android:hyphenationFrequency="fullFast"
-        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:autoSizeMaxTextSize="5000sp"
         android:autoSizeMinTextSize="12sp"
         android:autoSizeStepGranularity="2sp"
         android:autoSizeTextType="uniform"
-        android:gravity="center_vertical|center_horizontal"
-        android:justificationMode="none"
+        android:breakStrategy="simple"
+        android:clickable="true"
         android:contentDescription="@string/screen_message"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center_vertical|center_horizontal"
+        android:hyphenationFrequency="fullFast"
+        android:justificationMode="none"
         android:text="" />
+
+    <!-- Placeholder bottom sheet for settings. This will need to be replaced with
+        the actual settings for the app.
+        Also, this is only for portrait view. Landscape view will use a side sheet.
+     -->
+<!--    <FrameLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="vertical"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:padding="32dp"-->
+<!--        android:background="@drawable/settings_background">-->
+<!--        <Button-->
+<!--            android:id="@+id/button"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:text="Button" />-->
+<!--    </FrameLayout>-->
 </RelativeLayout>

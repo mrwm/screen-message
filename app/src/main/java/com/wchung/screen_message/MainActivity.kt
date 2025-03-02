@@ -61,16 +61,17 @@ class MainActivity : AppCompatActivity() {
             ViewCompat.onApplyWindowInsets(v, insets)
         }
 
-        //val dp8 : Int = convertDpToPixel(8f, this).toInt()
-        val dp32 : Int = convertDpToPixel(32f, this).toInt()
+        val dp8 : Int = convertDpToPixel(8f, this).toInt()
+        Log.d("dp8", dp8.toString()) //just to make the lint happy that convertDpToPixel is used
+        val dp16 : Int = convertDpToPixel(16f, this).toInt()
 
         // Get the root view and create a transition.
-        var rootView = findViewById<ViewGroup>(R.id.main)
-        var autoTransition = AutoTransition()
+        val rootView = findViewById<ViewGroup>(R.id.main)
+        val autoTransition = AutoTransition()
         autoTransition.setDuration(500) // Set to 500ms to make the fade more noticeable.
 
         // Grab the text from intents
-        var messageText : String? = getStringFromIntent(intent)
+        val messageText : String? = getStringFromIntent(intent)
 
         // Create the message EditText for user input
         message = EditText(this)
@@ -82,11 +83,11 @@ class MainActivity : AppCompatActivity() {
         )
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
         message!!.layoutParams = layoutParams
-        message!!.setPadding(dp32/2)
+        message!!.setPadding(dp16)
         message!!.gravity = View.TEXT_ALIGNMENT_CENTER
         message!!.textAlignment = View.TEXT_ALIGNMENT_CENTER
         message!!.isSingleLine = false
-        message!!.minHeight = dp32
+        message!!.minHeight = dp16*2
         message!!.hint = getString(R.string.enter_message_here)
         message!!.maxLines = 10 // don't cover the whole screen. We want to be able to click out
         message!!.setText(messageText)
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         message?.onFocusChangeListener = OnFocusChangeListener { view, hasFocus ->
             //Log.d("message", "Focus: $hasFocus")
             if (!hasFocus) {
-                toggleKeyboard(view, false)
+                //toggleKeyboard(view, false)
                 if (isEmptyText && !isVisible) {
                     TransitionManager.beginDelayedTransition(rootView, autoTransition)
                     rootView.addView(message)
@@ -164,27 +165,31 @@ class MainActivity : AppCompatActivity() {
             if (!isVisible) {
                 rootView.addView(message)
                 message?.requestFocus()
-                toggleKeyboard(message!!, true)
+                //toggleKeyboard(message!!, true)
             }
             if (!isEmptyText && isVisible) {
                 rootView.removeView(message)
             }
             if (isEmptyText) {
                 message?.requestFocus()
-                toggleKeyboard(message!!, true)
+                //toggleKeyboard(message!!, true)
             }
             isVisible = message?.parent != null
         }
+
+        // Implement a bottom sheet for listing all the settings.
+        // The bottom sheet should be able to be dragged up and down, and past the bottom of
+        // the screen in order to be hidden... or to only show the drag handle.
     }
 
-    private fun toggleKeyboard(view: View, show: Boolean = false) {
-        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken,
-                                    InputMethodManager.HIDE_NOT_ALWAYS)
-        if (show) {
-            inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
-        }
-    }
+//    private fun toggleKeyboard(view: View, show: Boolean = false) {
+//        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+//        inputMethodManager.hideSoftInputFromWindow(view.windowToken,
+//                                    InputMethodManager.HIDE_NOT_ALWAYS)
+//        if (show) {
+//            inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+//        }
+//    }
 
 
     // Save text properties when the screen rotates
@@ -204,9 +209,10 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    @Suppress("DEPRECATION")
     private fun getStringFromIntent(intent: Intent): String? {
         val intentAction = intent.action
-        var intentType = intent.type
+        val intentType = intent.type
         Log.i("getStringFromIntent", "intentAction: $intentAction")
         Log.i("getStringFromIntent", "intentType: $intentType")
 
@@ -219,8 +225,6 @@ class MainActivity : AppCompatActivity() {
 
         // Handle content that came with the intent
         val extras = intent.extras ?: return null
-
-        // Exit if there's no content
         if (Intent.ACTION_SEND == intentAction) {
             val singleFile = extras.getString(Intent.EXTRA_STREAM)
             val contentResolver = contentResolver

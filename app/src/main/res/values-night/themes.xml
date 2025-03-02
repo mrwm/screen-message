@@ -9,5 +9,7 @@
         <item name="layer2">@color/darkLayer2</item>
         <item name="layer3">@color/darkLayer3</item>
         <item name="layer4">@color/darkLayer4</item>
+
+        <item name="settings_background">@color/darkSettings</item>
     </style>
 </resources>

@@ -8,6 +8,8 @@
         <item name="layer2">@color/lightLayer2</item>
         <item name="layer3">@color/lightLayer3</item>
         <item name="layer4">@color/lightLayer4</item>
+
+        <item name="settings_background">@color/lightSettings</item>
     </style>
 
     <style name="Theme.ScreenMessage" parent="Base.Theme.ScreenMessage" />

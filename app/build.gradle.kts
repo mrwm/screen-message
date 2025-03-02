@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.wchung.screen_message"
-        minSdk = 26 //28
+        minSdk = 26 // api 26 is where autoSizeMaxTextSize is supported. Can't go lower
         targetSdk = 35
         versionCode = 1
         versionName = "0.0.${versionCode}"
@@ -46,6 +46,7 @@ android {
 
 dependencies {
 
+    //implementation(libs.androidx.fragment.ktx) // maybe use this later...
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)

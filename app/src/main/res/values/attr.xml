@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- For the text input box background -->
     <attr name="layer1" format="reference" />
     <attr name="layer2" format="reference" />
     <attr name="layer3" format="reference" />
     <attr name="layer4" format="reference" />
+
+    <!-- For the settings box -->
+    <attr name="settings_background" format="reference" />
 </resources>
